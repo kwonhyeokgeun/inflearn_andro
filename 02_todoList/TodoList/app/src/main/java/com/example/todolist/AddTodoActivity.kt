@@ -1,43 +1,63 @@
 package com.example.todolist
 
-import android.os.Bundle
-import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.WindowCompat
-import androidx.navigation.findNavController
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.navigateUp
-import androidx.navigation.ui.setupActionBarWithNavController
+import android.os.Bundle
+import android.widget.Toast
 import com.example.todolist.databinding.ActivityAddTodoBinding
+import com.example.todolist.db.AppDatabase
+import com.example.todolist.db.TodoDao
+import com.example.todolist.db.TodoEntity
 
 class AddTodoActivity : AppCompatActivity() {
+    private lateinit var binding : ActivityAddTodoBinding
+    private lateinit var db : AppDatabase
+    private lateinit var todoDao : TodoDao
 
-    private lateinit var appBarConfiguration: AppBarConfiguration
-    private lateinit var binding: ActivityAddTodoBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        WindowCompat.setDecorFitsSystemWindows(window, false)
         super.onCreate(savedInstanceState)
-
         binding = ActivityAddTodoBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        setSupportActionBar(binding.toolbar)
+        db = AppDatabase.getInstance(this)!!
+        todoDao = db.getTodo()
 
-        val navController = findNavController(R.id.nav_host_fragment_content_add_todo)
-        appBarConfiguration = AppBarConfiguration(navController.graph)
-        setupActionBarWithNavController(navController, appBarConfiguration)
-
-        binding.fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAnchorView(R.id.fab)
-                .setAction("Action", null).show()
+        binding.btnAdd.setOnClickListener {
+            insertTodo()
         }
+
     }
 
-    override fun onSupportNavigateUp(): Boolean {
-        val navController = findNavController(R.id.nav_host_fragment_content_add_todo)
-        return navController.navigateUp(appBarConfiguration)
-                || super.onSupportNavigateUp()
+    private fun insertTodo(){
+        val title : String = binding.edtTitle.text.toString()
+        val radioId : Int = binding.radioGroup.checkedRadioButtonId
+        var importance : Int = 0
+
+        when(radioId){
+            R.id.rbtn_high -> {
+                importance = 1
+            }
+            R.id.rbtn_mid -> {
+                importance = 2
+            }
+            R.id.rbtn_low -> {
+                importance = 3
+            }
+        }
+
+        if(radioId==-1 || title.isBlank()){
+            Toast.makeText(this, "제대로 입력해 주세요.",Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        Thread{
+            todoDao.insert(TodoEntity(null, title, importance))
+
+            runOnUiThread{ //ui는 UI스레드로
+                Toast.makeText(this, "추가 되었습니다.",Toast.LENGTH_SHORT).show()
+                finish() //이전화면으로 돌아가기
+            }
+        }.start()
+
     }
 }

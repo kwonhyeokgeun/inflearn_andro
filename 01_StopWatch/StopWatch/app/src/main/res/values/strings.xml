@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">StopWatch</string>
+    <string name="btn_start">시작</string>
+    <string name="btn_reset">초기화</string>
+    <string name="btn_pause">중지</string>
+
+    <string name="btn_start_en">Start</string>
+    <string name="btn_reset_en">Stop</string>
+    <string name="btn_pause_en">Reset</string>
+</resources>
